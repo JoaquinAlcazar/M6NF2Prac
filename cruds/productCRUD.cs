@@ -1,5 +1,7 @@
 ﻿using cat.itb.M6NF2Prac.models;
+using M6UF2EA3.connections;
 using M6UF2Prac;
+using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,6 +65,55 @@ namespace cat.itb.M6NF2Prac.cruds
                     session.Delete(product);
                     transaction.Commit();
                 }
+            }
+        }
+
+        public static product SelectByCodeADO(int code)
+        {
+            storeConnection db = new storeConnection();
+
+            var conn = db.GetConnection();
+
+            using var cmd = new NpgsqlCommand();
+            cmd.Connection = conn;
+            cmd.CommandText = "SELECT * FROM product WHERE code = @code";
+            cmd.Parameters.AddWithValue("code", code);
+
+            NpgsqlDataReader dr = cmd.ExecuteReader();
+
+            while (dr.Read())
+            {
+                product producte = new product
+                {
+                    id = dr.GetInt32(0),
+                    code = dr.GetInt32(1),
+                    description = dr.GetString(2),
+                    currentstock = dr.GetInt32(3),
+                    minstock = dr.GetInt32(4),
+                    price = dr.GetDouble(5),
+                    salesp = salespersonCRUD.SelectById(dr.GetInt32(6))
+                };
+
+                return producte;
+            }
+
+            return null;
+        }
+
+        public static void UpdateADO(product product)
+        {
+            using (var session = SessionFactoryStoreCloud.Open())
+            {
+                using (var transaction = session.BeginTransaction())
+                {
+                    //update price
+                    session.CreateSQLQuery("UPDATE product SET price = :price WHERE code = :code")
+                        .SetParameter("price", product.price)
+                        .SetParameter("code", product.code)
+                        .ExecuteUpdate();
+                }
+
+                Console.WriteLine($"Product {product.code} updated");
             }
         }
     }
