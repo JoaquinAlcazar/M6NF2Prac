@@ -25,7 +25,8 @@ namespace cat.itb.M6NF2Prac.maps
             Map(x => x.credit, "credit");
             Map(x => x.remark, "remark");
 
-            HasOne(x => x.product) // Relación One-To-One con product
+            HasOne(x => x.product)// Relación One-To-One con product
+                .Not.LazyLoad()
                 .ForeignKey("product") // La clave foránea está en provider
                 .Cascade.None(); // Evita eliminaciones en cascada
         }

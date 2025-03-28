@@ -116,5 +116,33 @@ namespace cat.itb.M6NF2Prac.cruds
                 Console.WriteLine($"Product {product.code} updated");
             }
         }
+
+        public static ISet<product> SelectByPriceHigherThan (double price)
+        {
+            using var session = SessionFactoryStoreCloud.Open();
+
+            var products = session.QueryOver<product>()
+                .Where(p => p.price > price)
+                .SelectList(list => list
+                    .Select(p => p.description)
+                    .Select(p => p.price))
+                .List<object[]>();
+
+            ISet<product> productsSet = new HashSet<product>();
+
+            foreach (object[] obj in products)
+            {
+                product product = new product
+                {
+                    description = obj[0].ToString(),
+                    price = Convert.ToDouble(obj[1])
+                };
+
+                productsSet.Add(product);
+            }
+
+            return productsSet;
+
+        }
     }
 }

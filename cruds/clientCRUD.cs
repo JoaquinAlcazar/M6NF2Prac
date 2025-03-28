@@ -2,6 +2,7 @@
 using FluentNHibernate.Conventions;
 using M6UF2EA3.connections;
 using M6UF2Prac;
+using NHibernate;
 using Npgsql;
 using System;
 using System.Collections.Generic;
@@ -80,7 +81,7 @@ namespace cat.itb.M6NF2Prac.cruds
                 using var cmd = new NpgsqlCommand();
                 cmd.Connection = conn;
 
-                string query = "INSERT INTO client (code, name) VALUES (" + item.code + ", '"+ item.name+"')";
+                string query = "INSERT INTO client (code, name) VALUES (" + item.code + ", '" + item.name + "')";
                 cmd.CommandText = query;
                 cmd.ExecuteNonQuery();
 
@@ -91,7 +92,6 @@ namespace cat.itb.M6NF2Prac.cruds
             }
         }
 
-        //Select and return the client
         public static client SelectByNameADO(string name)
         {
 
@@ -140,6 +140,38 @@ namespace cat.itb.M6NF2Prac.cruds
 
             // Close connection
             conn.Close();
+        }
+
+        public static client SelectByName(string name)
+        {
+            client client = null;
+            using (var session = SessionFactoryStoreCloud.Open())
+            {
+                client = session.CreateQuery("FROM client WHERE name = :name")
+                    .SetParameter("name", name)
+                    .UniqueResult<client>();
+
+                if (client != null)
+                {
+                    NHibernateUtil.Initialize(client.Orders); // 🔹 Cargar antes de cerrar la sesión
+                }
+
+                session.Close();
+            }
+            return client;
+        }
+
+        public static ISet<client> SelectByCreditHigherThan(double credit)
+        {
+
+            ISet<client> clients = new HashSet<client>();
+
+            using (var session = SessionFactoryStoreCloud.Open())
+            {
+                clients = new HashSet<client>(session.Query<client>().Where(x => x.credit > credit).ToList());
+            }
+
+            return clients;
         }
     }
 }

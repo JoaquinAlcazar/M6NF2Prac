@@ -69,5 +69,17 @@ namespace cat.itb.M6NF2Prac.cruds
                 }
             }
         }
+
+        public static ISet<orderprod> SelectCostHigherThan(double cost, int amount)
+        {
+            using var session = SessionFactoryStoreCloud.Open();
+
+            var orders = session.CreateQuery("FROM orderprod o JOIN FETCH o.product WHERE o.cost > :cost AND o.amount > :amount")
+                .SetParameter("cost", cost)
+                .SetParameter("amount", amount)
+                .List<orderprod>();
+
+            return new HashSet<orderprod>(orders);
+        }
     }
 }

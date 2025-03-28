@@ -23,7 +23,8 @@ namespace cat.itb.M6NF2Prac.maps
                 .KeyColumn("client") // Clave foránea en ORDERPROD
                 .Inverse() 
                 .AsSet()
-                .Cascade.All(); 
+                .Cascade.All()
+                .Fetch.Join(); 
         }
     }
 

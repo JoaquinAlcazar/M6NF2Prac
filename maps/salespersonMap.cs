@@ -25,7 +25,8 @@ namespace cat.itb.M6NF2Prac.maps
                 .KeyColumn("salesp") // Clave foránea en la tabla product
                 .Inverse() 
                 .AsSet()
-                .Cascade.All();
+                .Cascade.All()
+                .Fetch.Join();
         }
     }
 
